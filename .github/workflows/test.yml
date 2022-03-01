@@ -1,0 +1,295 @@
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pr-default:
+    name: Test PR with default params
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+      - uses: ./pr
+        with:
+          token: ${{ secrets.GIT_PAT }}
+          test-mode: true
+
+  # pr-mypy:
+  #   name: Test PR with mypy params
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 5
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #       with:
+  #         persist-credentials: false
+  #     - uses: ./pr
+  #       with:
+  #         token: ${{ secrets.GIT_PAT }}
+  #         mypy: src tests
+  #         test-mode: true
+
+  # pr-install:
+  #   name: Test PR with install params
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 5
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #       with:
+  #         persist-credentials: false
+  #     - uses: ./pr
+  #       with:
+  #         token: ${{ secrets.GIT_PAT }}
+  #         install: .
+  #         test-mode: true
+
+  # pr-python:
+  #   name: Test PR with python params
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 5
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #       with:
+  #         persist-credentials: false
+  #     - uses: ./pr
+  #       with:
+  #         token: ${{ secrets.GIT_PAT }}
+  #         python: 3.9
+  #         test-mode: true
+
+  # pr-wait:
+  #   name: Test PR with wait params
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 5
+
+  #   services:
+  #     postgres:
+  #       image: postgres
+  #       env:
+  #         POSTGRES_DB: test
+  #         POSTGRES_USER: justifai
+  #         POSTGRES_PASSWORD: justifai
+  #       ports:
+  #         - 5432:5432
+
+  #     mssql:
+  #       image: mcr.microsoft.com/mssql/server:2019-latest
+  #       env:
+  #         ACCEPT_EULA: Y
+  #         SA_PASSWORD: yourStrong#Password
+  #       ports:
+  #         - 1433:1433
+
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #       with:
+  #         persist-credentials: false
+  #     - uses: ./pr
+  #       with:
+  #         token: ${{ secrets.GIT_PAT }}
+  #         wait: 5432, 1433
+  #         test-mode: true
+
+  pr-branch-default:
+    name: Test PR with default params with branch
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+      - uses: ./pr
+        with:
+          token: ${{ secrets.GIT_PAT }}
+          depends-on: FROZENDICT, JAI_LIB
+          test-mode: true
+
+  # pr-branch-mypy:
+  #   name: Test PR with mypy params with branch
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 5
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #       with:
+  #         persist-credentials: false
+  #     - uses: ./pr
+  #       with:
+  #         token: ${{ secrets.GIT_PAT }}
+  #         depends-on: FROZENDICT, JAI_LIB
+  #         test-mode: true
+  #         mypy: src tests
+
+  # pr-branch-install:
+  #   name: Test PR with install params with branch
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 5
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #       with:
+  #         persist-credentials: false
+  #     - uses: ./pr
+  #       with:
+  #         token: ${{ secrets.GIT_PAT }}
+  #         depends-on: FROZENDICT, JAI_LIB
+  #         test-mode: true
+  #         install: .
+
+  # pr-branch-python:
+  #   name: Test PR with python params with branch
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 5
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #       with:
+  #         persist-credentials: false
+  #     - uses: ./pr
+  #       with:
+  #         token: ${{ secrets.GIT_PAT }}
+  #         depends-on: FROZENDICT, JAI_LIB
+  #         test-mode: true
+  #         python: 3.9
+
+  # pr-branch-wait:
+  #   name: Test PR with wait params with branch
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 5
+
+  #   services:
+  #     postgres:
+  #       image: postgres
+  #       env:
+  #         POSTGRES_DB: test
+  #         POSTGRES_USER: justifai
+  #         POSTGRES_PASSWORD: justifai
+  #       ports:
+  #         - 5432:5432
+
+  #     mssql:
+  #       image: mcr.microsoft.com/mssql/server:2019-latest
+  #       env:
+  #         ACCEPT_EULA: Y
+  #         SA_PASSWORD: yourStrong#Password
+  #       ports:
+  #         - 1433:1433
+
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #       with:
+  #         persist-credentials: false
+  #     - uses: ./pr
+  #       with:
+  #         token: ${{ secrets.GIT_PAT }}
+  #         depends-on: FROZENDICT, JAI_LIB
+  #         test-mode: true
+  #         wait: 5432, 1433
+
+  # tag-default:
+  #   name: Test tag with default params
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 5
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #       with:
+  #         persist-credentials: false
+  #     - uses: ./tag
+  #       with:
+  #         token: ${{ secrets.GIT_PAT }}
+  #         test-mode: true
+
+  # tag-python:
+  #   name: Test tag with python params
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 5
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #       with:
+  #         persist-credentials: false
+  #     - uses: ./tag
+  #       with:
+  #         token: ${{ secrets.GIT_PAT }}
+  #         python: 3.9
+  #         test-mode: true
+
+  # tag-install:
+  #   name: Test tag with install params
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 5
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #       with:
+  #         persist-credentials: false
+  #     - uses: ./tag
+  #       with:
+  #         token: ${{ secrets.GIT_PAT }}
+  #         install: .
+  #         test-mode: true
+
+  # tag-mypy:
+  #   name: Test tag with mypy params
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 5
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #       with:
+  #         persist-credentials: false
+  #     - uses: ./tag
+  #       with:
+  #         token: ${{ secrets.GIT_PAT }}
+  #         mypy: src tests
+  #         test-mode: true
+
+  # tag-wait:
+  #   name: Test tag with wait params
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 5
+
+  #   services:
+  #     postgres:
+  #       image: postgres
+  #       env:
+  #         POSTGRES_DB: test
+  #         POSTGRES_USER: justifai
+  #         POSTGRES_PASSWORD: justifai
+  #       ports:
+  #         - 5432:5432
+
+  #     mssql:
+  #       image: mcr.microsoft.com/mssql/server:2019-latest
+  #       env:
+  #         ACCEPT_EULA: Y
+  #         SA_PASSWORD: yourStrong#Password
+  #       ports:
+  #         - 1433:1433
+
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #       with:
+  #         persist-credentials: false
+  #     - uses: ./tag
+  #       with:
+  #         token: ${{ secrets.GIT_PAT }}
+  #         wait: 5432, 1433
+  #         test-mode: true
+
+  bump:
+    name: Test bump
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+      - uses: ./bump
+        with:
+          token: ${{ secrets.GIT_PAT }}
+          branch_name: ${{ github.head_ref }}
+          tag: test
+          sender: jai_lib
+          test-mode: true
