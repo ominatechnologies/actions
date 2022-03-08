@@ -104,7 +104,7 @@ runs:
       shell: bash
       run: git push --atomic origin main "${{ env.CURRENT_VERSION }}"
     - name: Set output for triggers
-      id: trigers
+      id: triggers
       if: inputs.triggers && ! inputs.test-mode
       shell: bash
       run: |
