@@ -119,7 +119,7 @@ runs:
         github_token: ${{ inputs.token }}
         workflow_file_name: bump.yml
         wait_workflow: false
-        inputs: '{"branch_name": "${{ github.head_ref }}", "tag": "${{ env.CURRENT_VERSION }}", "sender": "${{ github.repository }}"}'
+        inputs: '{"branch_name": "${{ github.head_ref }}", "tag": "${{ env.CURRENT_VERSION }}", "sender": "${{ github.event.repository.name }}"}'
     - uses: convictional/trigger-workflow-and-wait@v1.5.0
       if: inputs.triggers && steps.triggers.outputs.second
       with:
@@ -128,4 +128,4 @@ runs:
         github_token: ${{ inputs.token }}
         workflow_file_name: bump.yml
         wait_workflow: false
-        inputs: '{"branch_name": "${{ github.head_ref }}", "tag": "${{ env.CURRENT_VERSION }}", "sender": "${{ github.repository }}"}'
+        inputs: '{"branch_name": "${{ github.head_ref }}", "tag": "${{ env.CURRENT_VERSION }}", "sender": "${{ github.event.repository.name }}"}'
