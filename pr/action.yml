@@ -1,0 +1,97 @@
+name: Test PR
+description: checkout, check changelog, setup python, pip install, pre-commit, flake8, mypy, pytest
+
+inputs:
+  token:
+    description: git pat to execute git related commands
+    required: true
+    default: ${{ github.token }}
+  python:
+    description: python version to use
+    required: true
+    default: "3.8"
+  install:
+    description: locations to pip install
+    required: true
+    default: .
+  mypy:
+    description: path for mypy
+    required: false
+  wait:
+    description: wait for ports to be available
+    required: false
+  depends-on:
+    description: internal library dependencies (upercase !)
+    required: false
+  test-mode:
+    description: to test the workflow
+    required: false
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@v2
+      with:
+        persist-credentials: false
+        fetch-depth: 0
+    - name: Check that CHANGELOG.rst has been updated
+      shell: bash
+      run: git diff --name-only origin/main HEAD | grep CHANGELOG.rst || exit 1
+    - name: git cred
+      shell: bash
+      run: git config --global url.https://${{ inputs.token }}@github.com/.insteadOf ssh://git@github.com/
+    - name: Set env
+      shell: bash
+      id: set-env
+      if: inputs.depends-on
+      run: |
+        IFS=', ' read -r -a array <<< "${{ inputs.depends-on }}"
+        state=0
+        for element in "${array[@]}"
+        do
+          repo=$(echo $element | tr '[:upper:]' '[:lower:]')
+          git ls-remote --exit-code --heads https://${{ inputs.token }}@github.com/ominatechnologies/${repo}.git $GITHUB_HEAD_REF && echo "$element=$GITHUB_HEAD_REF" >> $GITHUB_ENV && state=$(($state || 1)) || echo ''
+        done
+        echo "::set-output name=state::$state"
+    - uses: actions/setup-python@v2
+      if: ${{ ! inputs.depends-on || steps.set-env.outputs.state != 0 }}
+      with:
+        python-version: ${{ inputs.python }}
+        cache: pip
+        cache-dependency-path: LICENSE
+    - name: Install tools and requirements
+      if: ${{ ! inputs.depends-on || steps.set-env.outputs.state != 0 }}
+      shell: bash
+      run: |
+        pip install -U pip setuptools wheel pre-commit
+        pip install -r requirements.dev.txt ${{ inputs.install }}
+    - uses: actions/cache@v2
+      if: ${{ ! inputs.depends-on || steps.set-env.outputs.state != 0 }}
+      with:
+        path: ~/.cache/pre-commit
+        key: pre-commit
+    - name: Run pre-commit
+      if: ${{ ! inputs.depends-on || steps.set-env.outputs.state != 0 }}
+      shell: bash
+      run: git diff --name-only origin/main HEAD | grep pre-commit-config && pre-commit run --all-files || pre-commit run --from-ref origin/main --to-ref HEAD
+    - name: Run flake8
+      if: ${{ ! inputs.depends-on || steps.set-env.outputs.state != 0 }}
+      shell: bash
+      run: flake8
+    - name: Run mypy
+      if: ${{ ! inputs.depends-on && inputs.mypy || steps.set-env.outputs.state != 0 && inputs.mypy }}
+      shell: bash
+      run: mypy ${{ inputs.mypy }}
+    - name: Wait for ports to be available
+      if: ${{ ! inputs.depends-on && inputs.wait || steps.set-env.outputs.state != 0 && inputs.wait }}
+      shell: bash
+      run: |
+        IFS=', ' read -r -a array <<< "${{ inputs.wait }}"
+        for element in "${array[@]}"
+        do
+          while ! nc -z localhost $element; do sleep 3; done
+        done
+    - name: Run pytest
+      if: ${{ ! inputs.depends-on || steps.set-env.outputs.state != 0 }}
+      shell: bash
+      run: pytest

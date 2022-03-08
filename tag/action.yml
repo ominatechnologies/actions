@@ -1,0 +1,131 @@
+name: Test merge and tag
+description: checkout, check changelog, setup python, pip install, pre-commit, flake8, mypy, pytest, tag, trigger other repos
+
+inputs:
+  token:
+    description: git pat to execute git related commands
+    required: true
+  python:
+    description: python version to use
+    required: true
+    default: "3.8"
+  install:
+    description: locations to pip install
+    required: true
+    default: .
+  mypy:
+    description: path for mypy
+    required: false
+  wait:
+    description: wait for ports to be available
+    required: false
+  triggers:
+    description: internal repos to trigger (comma separated)
+    required: false
+  test-mode:
+    description: to test the workflow
+    required: false
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@v2
+      with:
+        token: ${{ inputs.token }}
+    - name: git cred
+      shell: bash
+      run: git config --global url.https://${{ inputs.token }}@github.com/.insteadOf ssh://git@github.com/
+    - uses: actions/setup-python@v2
+      with:
+        python-version: ${{ inputs.python }}
+        cache: pip
+        cache-dependency-path: LICENSE
+    - name: Install tools and requirements
+      shell: bash
+      run: |
+        pip install -U pip setuptools wheel pre-commit bumpver
+        pip install -r requirements.dev.txt ${{ inputs.install }}
+    - uses: actions/cache@v2
+      with:
+        path: ~/.cache/pre-commit
+        key: pre-commit
+    - name: Run pre-commit
+      shell: bash
+      run: pre-commit run --all-files
+    - name: Run flake8
+      shell: bash
+      run: flake8
+    - name: Run mypy
+      if: inputs.mypy
+      shell: bash
+      run: mypy ${{ inputs.mypy }}
+    - name: Wait for ports to be available
+      if: inputs.wait
+      shell: bash
+      run: |
+        IFS=', ' read -r -a array <<< "${{ inputs.wait }}"
+        for element in "${array[@]}"
+        do
+          while ! nc -z localhost $element; do sleep 3; done
+        done
+    - name: Run pytest
+      shell: bash
+      run: pytest
+    - name: push new tag
+      shell: bash
+      run: |
+        # Git config
+        git config user.name "GitHub Actions"
+        git config user.email "scott.tiger@ominatechnologies.com"
+
+        # Latest change
+        git fetch -a
+        git reset --hard origin/${{ github.head_ref }}
+
+        # Tag and its message
+        bumpver update -n
+        tag=$(git show -s --format=%s | cut -c 16-)
+        echo "CURRENT_VERSION=$tag" >> $GITHUB_ENV
+        changes=$(sed -n '/^++++$/,/^++++++++/p' CHANGELOG.rst | sed '1d;$d' | sed '$d')
+        message=$(echo -e "\n$changes")
+
+        # Finalize changelog
+        sed -i "s/^++++$/++++\n\n$tag\n$(printf '+%.0s' $(seq 2 $(echo $tag | wc -c | tr -d ' ')))/" CHANGELOG.rst
+
+        # Commit changes
+        git add CHANGELOG.rst
+        git commit --amend --no-edit
+
+        # Tag the commit
+        git tag -a "$tag" -m "$message"
+
+    - name:  Push commit and tag
+      if: ${{ ! inputs.test-mode }}
+      shell: bash
+      run: git push --atomic origin ${{ github.head_ref }} "${{ env.CURRENT_VERSION }}"
+    - name: Set output for triggers
+      id: trigers
+      if: inputs.triggers && ! inputs.test-mode
+      shell: bash
+      run: |
+        IFS=', ' read -r -a array <<< "${{ inputs.triggers }}"
+        echo "::set-output name=first::${array[0]}"
+        echo "::set-output name=second::${array[1]}" || echo ''
+    - uses: convictional/trigger-workflow-and-wait@v1.5.0
+      if: inputs.triggers && steps.triggers.outputs.first
+      with:
+        owner: ominatechnologies
+        repo: ${{ steps.triggers.outputs.first }}
+        github_token: ${{ inputs.token }}
+        workflow_file_name: bump.yml
+        wait_workflow: false
+        inputs: '{"branch_name": "${{ github.head_ref }}", "tag": "${{ env.CURRENT_VERSION }}", "sender": "${{ github.repository }}"}'
+    - uses: convictional/trigger-workflow-and-wait@v1.5.0
+      if: inputs.triggers && steps.triggers.outputs.second
+      with:
+        owner: ominatechnologies
+        repo: ${{ steps.triggers.outputs.second }}
+        github_token: ${{ inputs.token }}
+        workflow_file_name: bump.yml
+        wait_workflow: false
+        inputs: '{"branch_name": "${{ github.head_ref }}", "tag": "${{ env.CURRENT_VERSION }}", "sender": "${{ github.repository }}"}'
