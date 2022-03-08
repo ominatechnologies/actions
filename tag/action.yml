@@ -80,7 +80,7 @@ runs:
 
         # Latest change
         git fetch -a
-        git reset --hard origin/${{ github.head_ref }}
+        git reset --hard origin/main
 
         # Tag and its message
         bumpver update -n
@@ -102,7 +102,7 @@ runs:
     - name:  Push commit and tag
       if: ${{ ! inputs.test-mode }}
       shell: bash
-      run: git push --atomic origin ${{ github.head_ref }} "${{ env.CURRENT_VERSION }}"
+      run: git push --atomic origin main "${{ env.CURRENT_VERSION }}"
     - name: Set output for triggers
       id: trigers
       if: inputs.triggers && ! inputs.test-mode
