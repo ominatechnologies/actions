@@ -98,14 +98,21 @@ runs:
 
         # Tag the commit
         git tag -a "$tag" -m "$message"
-
+    - name:  Register skip from event
+      if: contains(github.event.pull_request.tite, '[no tag]') || contains(github.event.pull_request.tite, '[skip tag]')
+      shell: bash
+      run: echo "TEST_MODE=true" >> $GITHUB_ENV
+    - name:  Register skip from input
+      if: inputs.test-mode
+      shell: bash
+      run: echo "TEST_MODE=true" >> $GITHUB_ENV
     - name:  Push commit and tag
-      if: ${{ ! inputs.test-mode }}
+      if: ${{ ! env.TEST_MODE }}
       shell: bash
       run: git push --atomic origin main "${{ env.CURRENT_VERSION }}"
     - name: Set output for triggers
       id: triggers
-      if: inputs.triggers && ! inputs.test-mode
+      if: inputs.triggers && ! env.TEST_MODE
       shell: bash
       run: |
         IFS=', ' read -r -a array <<< "${{ inputs.triggers }}"

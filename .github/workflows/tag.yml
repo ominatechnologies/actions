@@ -1,0 +1,27 @@
+name: Tag package
+
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    if: github.event.pull_request.merged == true
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+      - uses: ./tag
+        with:
+          token: ${{ secrets.GIT_PAT }}
