@@ -99,7 +99,7 @@ runs:
         # Tag the commit
         git tag -a "$tag" -m "$message"
     - name:  Register skip from event
-      if: contains(github.event.pull_request.tite, '[no tag]') || contains(github.event.pull_request.tite, '[skip tag]')
+      if: contains(github.event.pull_request.title, '[no tag]') || contains(github.event.pull_request.title, '[skip tag]')
       shell: bash
       run: echo "TEST_MODE=true" >> $GITHUB_ENV
     - name:  Register skip from input
