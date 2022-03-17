@@ -4,6 +4,7 @@ Action Changelog
 
 Head
 ++++
+- Fixed: tag behavior with TEST_MODE
 
 2022.3.11
 +++++++++
