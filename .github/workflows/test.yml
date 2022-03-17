@@ -293,3 +293,16 @@ jobs:
           tag: test
           sender: jai_lib
           test-mode: true
+
+  tag:
+    name: Test tag
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+      - uses: ./tag
+        with:
+          token: ${{ secrets.GIT_PAT }}
+          test-mode: true
