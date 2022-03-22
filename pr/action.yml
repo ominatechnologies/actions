@@ -70,10 +70,19 @@ runs:
       with:
         path: ~/.cache/pre-commit
         key: pre-commit
-    - name: Run pre-commit
+    - name: Pre-commit selection
       if: ${{ ! inputs.depends-on || steps.set-env.outputs.state != 0 }}
+      id: pre-commit
       shell: bash
-      run: git diff --name-only origin/main HEAD | grep pre-commit-config && pre-commit run --all-files || pre-commit run --from-ref origin/main --to-ref HEAD
+      run: echo "::set-output name=state::$(git diff --name-only origin/main HEAD | grep -c pre-commit-config)"
+    - name: Run pre-commit
+      if: ${{ ! inputs.depends-on && steps.pre-commit.outputs.state != 0 || steps.set-env.outputs.state != 0 && steps.pre-commit.outputs.state != 0 }}
+      shell: bash
+      run: pre-commit run --all-files
+    - name: Run pre-commit
+      if: ${{ ! inputs.depends-on && steps.pre-commit.outputs.state == 0 || steps.set-env.outputs.state != 0 && steps.pre-commit.outputs.state == 0 }}
+      shell: bash
+      run: pre-commit run --from-ref origin/main --to-ref HEAD
     - name: Run flake8
       if: ${{ ! inputs.depends-on || steps.set-env.outputs.state != 0 }}
       shell: bash
