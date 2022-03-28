@@ -23,6 +23,9 @@ inputs:
   depends-on:
     description: internal library dependencies (upercase !)
     required: false
+  python-envs:
+    description: python related environments
+    required: false
   test-mode:
     description: to test the workflow
     required: false
@@ -59,6 +62,10 @@ runs:
         python-version: ${{ inputs.python }}
         cache: pip
         cache-dependency-path: LICENSE
+    - name: Setup python related environment variables
+      if: inputs.python-envs
+      shell: bash
+      run: echo "${{ inputs.python-envs }}" | sed 's#pythonLocation#${{ env.pythonLocation }}#g' >> $GITHUB_ENV
     - name: Install tools and requirements
       if: ${{ ! inputs.depends-on || steps.set-env.outputs.state != 0 }}
       shell: bash
@@ -83,10 +90,6 @@ runs:
       if: ${{ ! inputs.depends-on && steps.pre-commit.outputs.state == 0 || steps.set-env.outputs.state != 0 && steps.pre-commit.outputs.state == 0 }}
       shell: bash
       run: pre-commit run --from-ref origin/main --to-ref HEAD
-    - name: Run flake8
-      if: ${{ ! inputs.depends-on || steps.set-env.outputs.state != 0 }}
-      shell: bash
-      run: flake8
     - name: Run mypy
       if: ${{ ! inputs.depends-on && inputs.mypy || steps.set-env.outputs.state != 0 && inputs.mypy }}
       shell: bash

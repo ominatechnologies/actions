@@ -22,6 +22,21 @@ jobs:
           token: ${{ secrets.GIT_PAT }}
           test-mode: true
 
+  pr-python-envs:
+    name: Test PR with python related env var params
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+      - uses: ./pr
+        with:
+          token: ${{ secrets.GIT_PAT }}
+          test-mode: true
+          python-envs: |
+            TEST_ENV=pythonLocation/share/ocore/templates
+
   # pr-mypy:
   #   name: Test PR with mypy params
   #   runs-on: ubuntu-latest
@@ -278,31 +293,31 @@ jobs:
   #         wait: 5432, 1433
   #         test-mode: true
 
-  bump:
-    name: Test bump
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          persist-credentials: false
-      - uses: ./bump
-        with:
-          token: ${{ secrets.GIT_PAT }}
-          branch_name: ${{ github.head_ref }}
-          tag: test
-          sender: jai_lib
-          test-mode: true
+  # bump:
+  #   name: Test bump
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 5
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #       with:
+  #         persist-credentials: false
+  #     - uses: ./bump
+  #       with:
+  #         token: ${{ secrets.GIT_PAT }}
+  #         branch_name: ${{ github.head_ref }}
+  #         tag: test
+  #         sender: jai_lib
+  #         test-mode: true
 
-  tag:
-    name: Test tag
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          persist-credentials: false
-      - uses: ./tag
-        with:
-          token: ${{ secrets.GIT_PAT }}
-          test-mode: true
+  # tag:
+  #   name: Test tag
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 5
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #       with:
+  #         persist-credentials: false
+  #     - uses: ./tag
+  #       with:
+  #         token: ${{ secrets.GIT_PAT }}
+  #         test-mode: true

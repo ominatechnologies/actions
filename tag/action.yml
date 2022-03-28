@@ -22,6 +22,9 @@ inputs:
   triggers:
     description: internal repos to trigger (comma separated)
     required: false
+  python-envs:
+    description: python related environments
+    required: false
   test-mode:
     description: to test the workflow
     required: false
@@ -40,6 +43,10 @@ runs:
         python-version: ${{ inputs.python }}
         cache: pip
         cache-dependency-path: LICENSE
+    - name: Setup python related environment variables
+      if: inputs.python-envs
+      shell: bash
+      run: echo "${{ inputs.python-envs }}" | sed 's#pythonLocation#${{ env.pythonLocation }}#g' >> $GITHUB_ENV
     - name: Install tools and requirements
       shell: bash
       run: |
@@ -52,9 +59,6 @@ runs:
     - name: Run pre-commit
       shell: bash
       run: pre-commit run --all-files
-    - name: Run flake8
-      shell: bash
-      run: flake8
     - name: Run mypy
       if: inputs.mypy
       shell: bash
