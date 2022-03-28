@@ -8,7 +8,7 @@ inputs:
   python:
     description: python version to use
     required: true
-    default: "3.8"
+    default: "3.9"
   install:
     description: locations to pip install
     required: true

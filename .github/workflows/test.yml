@@ -22,20 +22,20 @@ jobs:
           token: ${{ secrets.GIT_PAT }}
           test-mode: true
 
-  pr-python-envs:
-    name: Test PR with python related env var params
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          persist-credentials: false
-      - uses: ./pr
-        with:
-          token: ${{ secrets.GIT_PAT }}
-          test-mode: true
-          python-envs: |
-            TEST_ENV=pythonLocation/share/ocore/templates
+  # pr-python-envs:
+  #   name: Test PR with python related env var params
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 5
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #       with:
+  #         persist-credentials: false
+  #     - uses: ./pr
+  #       with:
+  #         token: ${{ secrets.GIT_PAT }}
+  #         test-mode: true
+  #         python-envs: |
+  #           TEST_ENV=pythonLocation/share/ocore/templates
 
   # pr-mypy:
   #   name: Test PR with mypy params
