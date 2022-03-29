@@ -75,6 +75,9 @@ runs:
     - name: Run pytest
       shell: bash
       run: pytest
+      env:
+        PYTHONHASHSEED: "0"
+        PYTHONUNBUFFERED: "0"
     - name: push new tag
       shell: bash
       run: |
