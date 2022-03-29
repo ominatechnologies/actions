@@ -35,7 +35,6 @@ runs:
       with:
         python-version: ${{ inputs.python }}
         cache: pip
-        cache-dependency-path: LICENSE
     - name: Install tools and requirements
       shell: bash
       run: pip install -U pip setuptools wheel pre-commit

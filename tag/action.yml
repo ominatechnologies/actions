@@ -25,6 +25,12 @@ inputs:
   python-envs:
     description: python related environments
     required: false
+  pytest-envs:
+    description: pytest related environments
+    required: false
+    default: |
+      PYTHONHASHSEED=0
+      PYTHONUNBUFFERED=0
   test-mode:
     description: to test the workflow
     required: false
@@ -42,7 +48,6 @@ runs:
       with:
         python-version: ${{ inputs.python }}
         cache: pip
-        cache-dependency-path: LICENSE
     - name: Setup python related environment variables
       if: inputs.python-envs
       shell: bash
@@ -72,12 +77,13 @@ runs:
         do
           while ! nc -z localhost $element; do sleep 3; done
         done
+    - name: Set default env vars for pytest
+      if: inputs.pytest-envs
+      shell: bash
+      run: echo "${{ inputs.pytest-envs }}" >> $GITHUB_ENV
     - name: Run pytest
       shell: bash
       run: pytest
-      env:
-        PYTHONHASHSEED: "0"
-        PYTHONUNBUFFERED: "0"
     - name: push new tag
       shell: bash
       run: |
