@@ -38,13 +38,13 @@ inputs:
 runs:
   using: composite
   steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         token: ${{ inputs.token }}
     - name: git cred
       shell: bash
       run: git config --global url.https://${{ inputs.token }}@github.com/.insteadOf ssh://git@github.com/
-    - uses: actions/setup-python@v2
+    - uses: actions/setup-python@v3
       with:
         python-version: ${{ inputs.python }}
         cache: pip
@@ -57,7 +57,7 @@ runs:
       run: |
         pip install -U pip setuptools wheel pre-commit bumpver
         pip install -r requirements.dev.txt ${{ inputs.install }}
-    - uses: actions/cache@v2
+    - uses: actions/cache@v3
       with:
         path: ~/.cache/pre-commit
         key: pre-commit
@@ -135,7 +135,7 @@ runs:
         IFS=', ' read -r -a array <<< "${{ inputs.triggers }}"
         echo "::set-output name=first::${array[0]}"
         echo "::set-output name=second::${array[1]}" || echo ''
-    - uses: convictional/trigger-workflow-and-wait@v1.5.0
+    - uses: convictional/trigger-workflow-and-wait@v1.6.0
       if: inputs.triggers && steps.triggers.outputs.first
       with:
         owner: ominatechnologies
@@ -144,7 +144,7 @@ runs:
         workflow_file_name: bump.yml
         wait_workflow: false
         inputs: '{"branch_name": "${{ github.head_ref }}", "tag": "${{ env.CURRENT_VERSION }}", "sender": "${{ github.event.repository.name }}"}'
-    - uses: convictional/trigger-workflow-and-wait@v1.5.0
+    - uses: convictional/trigger-workflow-and-wait@v1.6.0
       if: inputs.triggers && steps.triggers.outputs.second
       with:
         owner: ominatechnologies

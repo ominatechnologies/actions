@@ -17,7 +17,7 @@ inputs:
 runs:
   using: composite
   steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         token: ${{ inputs.token }}
     - name: Checkout branch
@@ -31,14 +31,14 @@ runs:
         # Switch to the branch or create it
         git checkout -B update-precommit
         git reset --hard origin/update-precommit || git push -u origin update-precommit
-    - uses: actions/setup-python@v2
+    - uses: actions/setup-python@v3
       with:
         python-version: ${{ inputs.python }}
         cache: pip
     - name: Install tools and requirements
       shell: bash
       run: pip install -U pip setuptools wheel pre-commit
-    - uses: actions/cache@v2
+    - uses: actions/cache@v3
       with:
         path: ~/.cache/pre-commit
         key: pre-commit
