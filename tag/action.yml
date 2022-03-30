@@ -115,21 +115,21 @@ runs:
       if: contains(github.event.pull_request.title, '[no tag]') || contains(github.event.pull_request.title, '[skip tag]')
       shell: bash
       run: |
-        echo TEST_MODE
-        echo "TEST_MODE=true" >> $GITHUB_ENV
+        echo TESTING_MODE
+        echo "TESTING_MODE=true" >> $GITHUB_ENV
     - name:  Register skip from input
       if: inputs.test-mode
       shell: bash
       run: |
-        echo TEST_MODE
-        echo "TEST_MODE=true" >> $GITHUB_ENV
+        echo TESTING_MODE
+        echo "TESTING_MODE=true" >> $GITHUB_ENV
     - name:  Push commit and tag
-      if: ${{ ! env.TEST_MODE }}
+      if: ${{ ! env.TESTING_MODE }}
       shell: bash
       run: git push --atomic origin main "${{ env.CURRENT_VERSION }}"
     - name: Set output for triggers
       id: triggers
-      if: inputs.triggers && ! env.TEST_MODE
+      if: inputs.triggers && ! env.TESTING_MODE
       shell: bash
       run: |
         IFS=', ' read -r -a array <<< "${{ inputs.triggers }}"
