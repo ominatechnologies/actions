@@ -78,7 +78,7 @@ runs:
       if: ${{ ! inputs.depends-on || steps.set-env.outputs.state != 0 }}
       with:
         path: ~/.cache/pre-commit
-        key: ${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
+        key: ${{ hashFiles('.pre-commit-config.yaml') }}
     - name: Pre-commit selection
       if: ${{ ! inputs.depends-on || steps.set-env.outputs.state != 0 }}
       id: pre-commit
