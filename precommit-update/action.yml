@@ -30,7 +30,7 @@ runs:
         git fetch -ap
         # Switch to the branch or create it
         git checkout -B update-precommit
-        git reset --hard origin/update-precommit || git push -u origin update-precommit
+        git reset --hard origin/main || git push -u origin update-precommit
     - uses: actions/setup-python@v3
       with:
         python-version: ${{ inputs.python }}
@@ -55,7 +55,7 @@ runs:
       env:
         GITHUB_TOKEN: ${{ inputs.token }}
       with:
-        title: "Update pre-commit config"
+        title: "Update pre-commit config [no tag]"
         body: |
           Update report
           - Update pre-commit config
