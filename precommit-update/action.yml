@@ -49,6 +49,11 @@ runs:
       shell: bash
       id: update-pre-commit
       run: echo "::set-output name=state::$(git diff --name-only origin/main HEAD | grep -c pre-commit-config)"
+    - name: changelog
+      if: steps.update-pre-commit.outputs.state != 0
+      shell: bash
+      run:  |
+        sed -i "s/^++++$/++++\n- chore: update pre-commit config/" CHANGELOG.rst
     - name: Create or Update Pull Request
       if: ${{ steps.update-pre-commit.outputs.state != 0 && ! inputs.test-mode }}
       uses: gr2m/create-or-update-pull-request-action@v1.x
