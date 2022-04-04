@@ -28,9 +28,6 @@ inputs:
   pytest-envs:
     description: pytest related environments
     required: false
-    default: |
-      PYTHONHASHSEED=0
-      PYTHONUNBUFFERED=0
   test-mode:
     description: to test the workflow
     required: false
