@@ -83,7 +83,7 @@ runs:
       if: ${{ ! inputs.depends-on || steps.set-env.outputs.state != 0 }}
       id: pre-commit
       shell: bash
-      run: echo "::set-output name=state::$(git diff --name-only origin/main HEAD | grep -c pre-commit-config)"
+      run: echo "::set-output name=state::$(git diff --name-only origin/main | grep -c pre-commit-config)"
     - name: Run pre-commit
       if: ${{ ! inputs.depends-on && steps.pre-commit.outputs.state != 0 || steps.set-env.outputs.state != 0 && steps.pre-commit.outputs.state != 0 }}
       shell: bash
