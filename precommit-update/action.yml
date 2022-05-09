@@ -20,6 +20,18 @@ runs:
     - uses: actions/checkout@v3
       with:
         token: ${{ inputs.token }}
+    - name: Checkout branch
+      shell: bash
+      run: |
+        # Git config
+        git config user.name "GitHub Actions"
+        git config user.email "scott.tiger@ominatechnologies.com"
+        # Fetch latest
+        git fetch -ap
+        # Reset
+        git reset --hard origin/main
+        # Delete old branch
+        (git branch -D update-precommit && git push origin --delete update-precommit) || echo nothing
     - uses: actions/setup-python@v3
       with:
         python-version: ${{ inputs.python }}
