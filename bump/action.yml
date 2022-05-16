@@ -35,7 +35,7 @@ runs:
         git config user.name "GitHub Actions"
         git config user.email "scott.tiger@ominatechnologies.com"
         # Fetch latest
-        git fetch -ap
+        git fetch -apq
         # Switch to the branch or create it
         git checkout -B ${{ inputs.branch_name }}
         git reset --hard origin/${{ inputs.branch_name }} || git push -u origin ${{ inputs.branch_name }}
