@@ -79,19 +79,10 @@ runs:
       with:
         path: ~/.cache/pre-commit
         key: ${{ hashFiles('.pre-commit-config.yaml') }}
-    - name: Pre-commit selection
-      if: ${{ ! inputs.depends-on || steps.set-env.outputs.state != 0 }}
-      id: pre-commit
-      shell: bash
-      run: echo "::set-output name=state::$(git diff --name-only origin/main | grep -c pre-commit-config)"
     - name: Run pre-commit
-      if: ${{ ! inputs.depends-on && steps.pre-commit.outputs.state != 0 || steps.set-env.outputs.state != 0 && steps.pre-commit.outputs.state != 0 }}
+      if: ${{ ! inputs.depends-on || steps.set-env.outputs.state != 0 }}
       shell: bash
       run: pre-commit run --all-files
-    - name: Run pre-commit
-      if: ${{ ! inputs.depends-on && steps.pre-commit.outputs.state == 0 || steps.set-env.outputs.state != 0 && steps.pre-commit.outputs.state == 0 }}
-      shell: bash
-      run: pre-commit run --from-ref origin/main --to-ref HEAD
     - name: Run mypy
       if: ${{ ! inputs.depends-on && inputs.mypy || steps.set-env.outputs.state != 0 && inputs.mypy }}
       shell: bash
