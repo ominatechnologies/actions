@@ -321,3 +321,18 @@ jobs:
   #       with:
   #         token: ${{ secrets.GIT_PAT }}
   #         test-mode: true
+
+  check:
+    name: Test check pipeline
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+      - uses: ./check_upstream
+        with:
+          token: ${{ secrets.GIT_PAT }}
+          branch_name: master
+          upstreams: frozendict, jai_lib, ocore, omodels, jai_operations, jai_engine, jai_client
+          test-mode: true
