@@ -22,7 +22,7 @@ inputs:
     required: false
   depends-on:
     description: internal library dependencies (upercase !)
-    required: false
+    required: true
   python-envs:
     description: python related environments
     required: false
@@ -48,19 +48,14 @@ runs:
       run: git config --global url.https://${{ inputs.token }}@github.com/.insteadOf ssh://git@github.com/
     - name: Set env
       shell: bash
-      id: set-env
-      if: inputs.depends-on
       run: |
         IFS=', ' read -r -a array <<< "${{ inputs.depends-on }}"
-        state=0
         for element in "${array[@]}"
         do
           repo=$(echo $element | tr '[:upper:]' '[:lower:]')
-          git ls-remote --exit-code --heads https://${{ inputs.token }}@github.com/ominatechnologies/${repo}.git $GITHUB_HEAD_REF && echo "$element=$GITHUB_HEAD_REF" >> $GITHUB_ENV && state=$(($state || 1)) || echo ''
+          git ls-remote --exit-code --heads https://${{ inputs.token }}@github.com/ominatechnologies/${repo}.git $GITHUB_HEAD_REF && echo "$element=$GITHUB_HEAD_REF" >> $GITHUB_ENV || echo ''
         done
-        echo "::set-output name=state::$state"
     - uses: actions/setup-python@v3
-      if: ${{ ! inputs.depends-on || steps.set-env.outputs.state != 0 }}
       with:
         python-version: ${{ inputs.python }}
         cache: pip
@@ -69,26 +64,23 @@ runs:
       shell: bash
       run: echo "${{ inputs.python-envs }}" | sed 's#pythonLocation#${{ env.pythonLocation }}#g' >> $GITHUB_ENV
     - name: Install tools and requirements
-      if: ${{ ! inputs.depends-on || steps.set-env.outputs.state != 0 }}
       shell: bash
       run: |
         pip install -U pip setuptools wheel pre-commit
         pip install -r requirements.dev.txt ${{ inputs.install }}
     - uses: actions/cache@v3
-      if: ${{ ! inputs.depends-on || steps.set-env.outputs.state != 0 }}
       with:
         path: ~/.cache/pre-commit
         key: ${{ hashFiles('.pre-commit-config.yaml') }}
     - name: Run pre-commit
-      if: ${{ ! inputs.depends-on || steps.set-env.outputs.state != 0 }}
       shell: bash
       run: pre-commit run --all-files
     - name: Run mypy
-      if: ${{ ! inputs.depends-on && inputs.mypy || steps.set-env.outputs.state != 0 && inputs.mypy }}
+      if: inputs.mypy
       shell: bash
       run: mypy ${{ inputs.mypy }}
     - name: Wait for ports to be available
-      if: ${{ ! inputs.depends-on && inputs.wait || steps.set-env.outputs.state != 0 && inputs.wait }}
+      if: inputs.wait
       shell: bash
       run: |
         IFS=', ' read -r -a array <<< "${{ inputs.wait }}"
@@ -101,6 +93,5 @@ runs:
       shell: bash
       run: echo "${{ inputs.pytest-envs }}" >> $GITHUB_ENV
     - name: Run pytest
-      if: ${{ ! inputs.depends-on || steps.set-env.outputs.state != 0 }}
       shell: bash
       run: pytest

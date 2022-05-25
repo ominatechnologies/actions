@@ -4,6 +4,7 @@ Action Changelog
 
 Head
 ++++
+- Added: optimize pipeline run
 
 2022.5.23
 +++++++++
